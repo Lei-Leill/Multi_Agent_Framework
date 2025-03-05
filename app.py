@@ -155,9 +155,9 @@ class BaselineResearchAgent(autogen.AssistantAgent):
         **Baseline Metric Name**: [Metric]  \
         **Unit**: [Measurement Unit]  \
         **Baseline Value**: [Value]  \
-        **Source**: [URL or Citation]  \
         ``` \
         \
+        At the end, list the sources used with citation\
         Now, research and establish baseline metrics for the following counterfactual scenarios."
 
         # Call Perplexity AI to conduct baseline research
@@ -174,36 +174,34 @@ class BaselineResearchAgent(autogen.AssistantAgent):
             "content": f"**Baseline Research Findings:**\n{response_text}",
             "data": {"baseline_research": response_text}
         }
-
 class FirstOrderOutcomeAgent(autogen.AssistantAgent):
     def __init__(self, name, data, **kwargs):
-        super().__init__(name=name, **kwargs)  # Properly pass 'name' to superclass AssistantAgent
+        super().__init__(name=name, **kwargs)
         self.counterfactual_scenarios = data["counterfactual_scenarios"]
         self.baseline_research = data["baseline_research"]
 
     def generate_reply(self, messages, sender, **kwargs):
-        """Generates First Order Outcomes based on counterfactual scenarios and baseline research."""
+        """Generates First Order Outcomes with quantifiable, measurable impact."""
 
         if not self.counterfactual_scenarios or not self.baseline_research:
             return {"role": "assistant", "content": "Error: Missing counterfactual scenarios or baseline research."}
 
-        # Prompt to generate First Order Outcome
-        first_order_prompt = "Analyze the following counterfactual scenarios and baseline research data to generate a **First Order Outcome** for each. \
-        The **First Order Outcome** is the **direct, immediate** result of implementing the metric, \
-        as opposed to what would have occurred in the counterfactual. It should: \
-        - **Describe the increase/decrease** of the metric or the decrease/increase of the counterfactual. \
-        - **Be measurable in the same unit as the baseline data**. \
-        - **Be concise (max 5 words) and clearly defined**. \
-        - Avoid vague descriptions or assumptions. \
-        \
-        ### **Output Format:** \
-        ``` \
-        **First Order Outcome**: [Outcome Name] ([Unit])  \
-        ``` \
-        \
-        Now, analyze the following counterfactual scenarios and generate the First Order Outcomes."
+        # Improved Prompt for First Order Outcomes
+        first_order_prompt = (
+            "Analyze the following counterfactual scenarios and baseline research data to generate **First Order Outcomes**.\n"
+            "- **First Order Outcome** must be the **direct, immediate effect** of the metric being implemented.\n"
+            "- It should **quantify the difference** in impact **compared to the baseline value**.\n"
+            "- The value **must be numerical and measurable in the same unit as the baseline metric**.\n"
+            "- Use a format that includes the **exact percentage, amount, or impact value**.\n\n"
+            "### **Output Format:**\n"
+            "``` \n"
+            "**First Order Outcome**: [Outcome Name] ([Unit], Change from Baseline)\n"
+            "```\n\n"
+            "At the end, list the sources used with citation"
+            "Now, generate First Order Outcomes using the given counterfactual scenarios and baseline data."
+        )
 
-        # Call Perplexity AI for first-order outcomes
+        # Call Perplexity AI for First Order Outcomes
         response_text = call_perplexity([
             {"role": "system", "content": first_order_prompt},
             {"role": "user", "content": f"Counterfactuals:\n{self.counterfactual_scenarios}\n\nBaseline Research:\n{self.baseline_research}"}
@@ -217,34 +215,34 @@ class FirstOrderOutcomeAgent(autogen.AssistantAgent):
             "content": f"**First Order Outcomes:**\n{response_text}",
             "data": {"first_order_outcomes": response_text}
         }
-
+    
 class SecondOrderOutcomeAgent(autogen.AssistantAgent):
     def __init__(self, name, data, **kwargs):
-        super().__init__(name=name, **kwargs)  # Properly pass 'name' to superclass AssistantAgent
+        super().__init__(name=name, **kwargs)
         self.first_order_outcomes = data["first_order_outcomes"]
 
     def generate_reply(self, messages, sender, **kwargs):
-        """Generates Second Order Outcomes based on First Order Outcomes."""
+        """Generates Second Order Outcomes with measurable, unique impacts."""
 
         if not self.first_order_outcomes:
             return {"role": "assistant", "content": "Error: No First Order Outcomes provided."}
 
-        # Prompt to generate Second Order Outcomes based on First Order Outcomes
-        second_order_prompt = "Analyze the following **First Order Outcomes** and generate a **Second Order Outcome** for each. \
-        The **Second Order Outcome** must be a **direct, measurable result** of the First Order Outcome. \
-        - **It must NOT duplicate or closely resemble the First Order Outcome**. \
-        - **It should describe the broader social, economic, or environmental impact** resulting from the First Order Outcome. \
-        - **It must be measurable using one of the provided measurement units**. \
-        - **Avoid vague or generic outcomes** (e.g., 'Improved Society'). \
-        \
-        ### **Output Format:** \
-        ``` \
-        **Second Order Outcome**: [Outcome Name] ([Unit])  \
-        ``` \
-        \
-        Now, analyze the following First Order Outcomes and generate corresponding Second Order Outcomes."
+        # Improved Prompt for Second Order Outcomes
+        second_order_prompt = (
+            "Analyze the following **First Order Outcomes** and generate **Second Order Outcomes** that are:\n"
+            "- A **direct, measurable** consequence of the First Order Outcome.\n"
+            "- Must be **unique** and **not just a repetition** of the First Order Outcome.\n"
+            "- Must be **numerically quantifiable** and use **a measurable unit**.\n"
+            "- Include the **exact change** in value or percentage from the First Order Outcome.\n\n"
+            "### **Output Format:**\n"
+            "``` \n"
+            "**Second Order Outcome**: [Outcome Name] ([Unit], Change from First Order Outcome)\n"
+            "```\n\n"
+            "At the end, list the sources used with citation"
+            "Now, generate the Second Order Outcomes based on the following First Order Outcomes."
+        )
 
-        # Call Perplexity AI for second-order outcomes
+        # Call Perplexity AI for Second Order Outcomes
         response_text = call_perplexity([
             {"role": "system", "content": second_order_prompt},
             {"role": "user", "content": self.first_order_outcomes}
@@ -258,6 +256,71 @@ class SecondOrderOutcomeAgent(autogen.AssistantAgent):
             "content": f"**Second Order Outcomes:**\n{response_text}",
             "data": {"second_order_outcomes": response_text}
         }
+    
+class FinalSummaryAgent(autogen.AssistantAgent):
+    def __init__(self, name, data, **kwargs):
+        super().__init__(name=name, **kwargs)
+        self.shared_memory = data  # Access all collected data
+
+    def generate_reply(self, messages, sender, **kwargs):
+        """Validates and summarizes all collected impact data into a structured report."""
+
+        # Check if all required data is available
+        if not all(key in self.shared_memory for key in ["counterfactual_scenarios", "baseline_research", "first_order_outcomes", "second_order_outcomes"]):
+            return {"role": "assistant", "content": "Error: Missing required data for final summary."}
+
+        # Extract relevant data
+        counterfactual_scenarios = self.shared_memory["counterfactual_scenarios"]
+        baseline_research = self.shared_memory["baseline_research"]
+        first_order_outcomes = self.shared_memory["first_order_outcomes"]
+        second_order_outcomes = self.shared_memory["second_order_outcomes"]
+
+        # Final Summary Prompt
+        summary_prompt = (
+            "Generate a **structured impact summary** using the validated data from counterfactual scenarios, "
+            "baseline research, first-order outcomes, and second-order outcomes. "
+            "Ensure all information is **quantifiable, logically consistent, and aligned with industry standards**.\n\n"
+            "### **Final Summary Report Structure**:\n"
+            "- **Counterfactual Analysis**: Summarize the key counterfactuals analyzed.\n"
+            "- **Baseline Research**: Report industry-standard benchmarks used for comparison.\n"
+            "- **First Order Outcomes**: List and validate the immediate effects of implementing the intervention.\n"
+            "- **Second Order Outcomes**: Summarize indirect ripple effects and ensure they are distinct from First Order Outcomes.\n"
+            "- **Overall Impact Assessment**: Provide a conclusion based on the **net quantified impact**.\n"
+            "- **Validation Check**: Ensure all figures align with industry benchmarks and sources are properly cited.\n\n"
+            "### **Output Format:**\n"
+            "```\n"
+            "**Counterfactual Analysis**:\n"
+            "[Concise summary of counterfactuals]\n\n"
+            "**Baseline Research**:\n"
+            "[Key baseline metrics used for comparison]\n\n"
+            "**First Order Outcomes**:\n"
+            "- [Outcome Name] ([Unit], Change from Baseline)\n"
+            "- [Outcome Name] ([Unit], Change from Baseline)\n\n"
+            "**Second Order Outcomes**:\n"
+            "- [Outcome Name] ([Unit], Change from First Order Outcome)\n"
+            "- [Outcome Name] ([Unit], Change from First Order Outcome)\n\n"
+            "**Overall Impact Assessment**:\n"
+            "[Summarize net effect with quantifiable insights]\n\n"
+            "**Validation Check**:\n"
+            "[Ensure all figures align with industry benchmarks]\n"
+            "```\n\n"
+            "Now, summarize the collected data into the required format."
+        )
+
+        # Call Perplexity AI to validate & summarize
+        response_text = call_perplexity([
+            {"role": "system", "content": summary_prompt},
+            {"role": "user", "content": f"Counterfactuals:\n{counterfactual_scenarios}\n\nBaseline Research:\n{baseline_research}\n\nFirst Order Outcomes:\n{first_order_outcomes}\n\nSecond Order Outcomes:\n{second_order_outcomes}"}
+        ])
+
+        # Store final summary
+        shared_memory["final_summary"] = response_text
+
+        return {
+            "role": "assistant",
+            "content": f"**Final Validated Summary:**\n{response_text}",
+            "data": {"final_summary": response_text}
+        }
 
 # Citation Validation Agent
 class CitationValidationAgent(autogen.AssistantAgent):
@@ -265,13 +328,6 @@ class CitationValidationAgent(autogen.AssistantAgent):
         """Verifies the validity of the data sources."""
         response_text = call_perplexity(messages)
         return {"role": "assistant", "content": f"Verified citations:\n{response_text}"}
-
-# Data Accuracy Agent
-class DataAccuracyAgent(autogen.AssistantAgent):
-    def generate_reply(self, messages, sender, **kwargs):
-        """Ensures the accuracy of counterfactual data and adjusts where necessary."""
-        response_text = call_perplexity(messages)
-        return {"role": "assistant", "content": f"Revised counterfactuals:\n{response_text}"}
 
 
 def main():
@@ -313,18 +369,10 @@ def main():
     second_order_agent = SecondOrderOutcomeAgent(name="SecondOrderOutcomeAgent", data=shared_memory)
     user_proxy.initiate_chat(second_order_agent, message="Identify Second Order Outcomes.")
 
-    '''
-    # Instantiate the Agents
-    website_parsing_agent = WebsiteParsingAgent(name="WebsiteParsingAgent")
+    # Step 6: Generate Final Validated Summary
+    final_summary_agent = FinalSummaryAgent(name="FinalSummaryAgent", data=shared_memory)
+    user_proxy.initiate_chat(final_summary_agent, message="Generate a validated impact summary.")
 
-    website_task = "Provide a website URL for counterfactual analysis."
-    user_proxy.initiate_chat(website_parsing_agent, message=website_task)
-
-    scenario_agent = ScenarioIdentificationAgent(name="ScenarioIdentificationAgent", data = shared_memory["website_text"])
-
-    # Step 3: Pass extracted website data to Scenario Identification Agent
-    user_proxy.initiate_chat(scenario_agent, message="Generate counterfactual scenarios based on extracted website data.")
-    '''
 
 if __name__ == "__main__":
     main()
