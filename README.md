@@ -11,6 +11,8 @@ ensure that you've installed all the libraries at the top of app.py to successfu
 pip install autogen
 ```
 
+**Below includes the description of each agent and prompts fed into Perplexity**
+
 General System Prompt:
 You are an expert in Impact Analysis. Your ultimate task is to compile a list that \
 includes metrics, counterfactuals, first-order outcomes, second-order outcomes, and costs that \
