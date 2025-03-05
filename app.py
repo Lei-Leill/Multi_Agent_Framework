@@ -15,7 +15,7 @@ api_call_count = 0
 shared_memory = {} 
 
 # Function to query Perplexity AI
-def call_perplexity(messages, temperature=0.2, max_tokens=500):
+def call_perplexity(messages, temperature=0.2, max_tokens=1000):
     global api_call_count
     if api_call_count >= MAX_API_CALLS:
         return "API call limit reached. Please try again later."
@@ -33,7 +33,7 @@ def call_perplexity(messages, temperature=0.2, max_tokens=500):
         "return_images": False,
         "return_related_questions": False,
         "search_recency_filter": None,
-        "top_k": 0,
+        "top_k": 5,
         "stream": False,
         "presence_penalty": 0,
         "frequency_penalty": 1,
@@ -91,21 +91,31 @@ class ScenarioIdentificationAgent(autogen.AssistantAgent):
     def generate_reply(self, messages, sender, **kwargs):
         """Generates counterfactual scenarios based on extracted website data using Perplexity API."""
 
-        counterfac_exp = "Generate a structured list of counterfactual scenarios that describe \
-            alternative outcomes in the absence of the product/ service of the comapny. \
-            Ensure that these counterfactuals are realisticand provide measurable differences in impact.\
-            For each counterfactual scenario:\
-            Identify the most likely alternative actions or conditions that would exist without the intervention.\
-            Ensure each counterfactual is quantifiable, providing measurable impact differences where possible.\
-            If exact data is unavailable, suggest proxy metrics or calculations that can approximate the missing values.\
-            Ensure all assumptions are logically sound and avoid speculative or unsupported claims.\
-            Format the response as a structured output, where each counterfactual scenario includes:\
-            Scenario Name: A clear title for the counterfactual, and should be a common key word used in research and report\
-            Unit: A likely unit commonly used in research and can lead us to quatified impact\
-            Description: A short explanation of what happens in the absence of the intervention.\
-            Expected Impact: A  difference compared to the original intervention.\
-            Relevant Data Points: Any supporting research, statistics, or calculations to validate the scenario.\
-            At the end, list the sources used with citation"
+        counterfac_exp = "Conduct an **internet-wide search**, including academic papers, government reports, and industry sources, to generate a structured list of counterfactual scenarios analyzing alternative outcomes in the absence of electric vehicles (EVs). \
+                \
+                ### **Counterfactual Scenario Requirements**: \
+                - **Realistic & Research-Based**: Ensure counterfactuals are **real-world plausible** and grounded in **verified data**. \
+                - **Measurable Impact**: Provide **quantifiable comparisons**, using research-based metrics where available. \
+                - **Alternative Conditions**: Identify the most **likely alternative** actions, processes, or materials that would be used instead. \
+                - **Proxy Metrics for Missing Data**: If exact data is unavailable, suggest **proxy indicators** or approximate calculations. \
+                - **Avoid Unsupported Claims**: Ensure **logical soundness**, avoiding speculation without factual support. \
+                \
+                ### **Structured Output Format**: \
+                For each counterfactual scenario, structure the response as follows: \
+                1. **Scenario Name**: A clear title, using terminology commonly found in **academic research, reports, or industry studies**. \
+                2. **Unit of Measurement**: - A commonly used research metric that allows for **quantifiable impact assessment**. \
+                3. **Description**: A short explanation of **what happens if electric vehicles do not exist**. \
+                4. **Expected Impact**: \
+                - A measurable **difference in impact** compared to the original intervention. \
+                - Where possible, **include numerical estimates, percentage changes, or relative comparisons**. \
+                5. **Relevant Data Points**: \
+                - Provide **supporting research, statistics, or calculations** from credible sources. \
+                - If exact data is unavailable, suggest **alternative indicators or modeling approaches**. \
+                ### **External Research & Sources**: \
+                - Search the **internet**, **research databases**, **government reports**, and **news sources** to gather evidence. \
+                - Include **at least 5 reputable sources** with **inline citations** (e.g., `[1]`) and a **bibliography** at the end. \
+                - Prefer sources from **peer-reviewed journals (e.g., ScienceDirect, ArXiv, PubMed)**, **official government sites (e.g., EPA, WHO, UN reports)**, and **trusted media outlets (e.g., NYTimes, BBC, Forbes)**. \
+                At the end, list the sources used with citation"
         # Call Perplexity API to generate counterfactuals
         response_text = call_perplexity([
             {"role": "system", "content": f"Generate two counterfactuals based on the given company website text. The standard is {counterfac_exp}"},
