@@ -1,6 +1,15 @@
 # Multi_Agent_Framework
 
-The pipeline is built up in the app.py file
+The pipeline is built up in the app.py file, and can be run by
+
+```
+python3 app.py
+```
+ensure that you've installed all the libraries at the top of app.py to successfully run the code, this is an example of installing autogen
+
+```
+pip install autogen
+```
 
 General System Prompt:
 You are an expert in Impact Analysis. Your ultimate task is to compile a list that \
@@ -20,7 +29,7 @@ second-order outcomes, and costs are quantifiable. \Each output must:\
 
 2. ScenarioIdentificaitonAgent - Identify 2 Counterfactual scenario
 
-Prompt: "Conduct an **internet-wide search**, including academic papers, government reports, and industry sources, to generate a          structured list of counterfactual scenarios analyzing alternative outcomes in the absence of electric vehicles (EVs). \
+Prompt: "Conduct an **internet-wide search**, including academic papers, government reports, and industry sources, to generate a          structured list of counterfactual scenarios analyzing alternative outcomes in the absence of company's product or service. \
         \
         ### **Counterfactual Scenario Requirements**: \
         - **Realistic & Research-Based**: Ensure counterfactuals are **real-world plausible** and grounded in **verified data**. \

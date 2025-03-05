@@ -91,7 +91,8 @@ class ScenarioIdentificationAgent(autogen.AssistantAgent):
     def generate_reply(self, messages, sender, **kwargs):
         """Generates counterfactual scenarios based on extracted website data using Perplexity API."""
 
-        counterfac_exp = "Conduct an **internet-wide search**, including academic papers, government reports, and industry sources, to generate a structured list of counterfactual scenarios analyzing alternative outcomes in the absence of electric vehicles (EVs). \
+        counterfac_exp = "Conduct an **internet-wide search**, including academic papers, government reports, and industry sources, to generate a \
+            structured list of counterfactual scenarios analyzing alternative outcomes in the absence of company's product or service. \
                 \
                 ### **Counterfactual Scenario Requirements**: \
                 - **Realistic & Research-Based**: Ensure counterfactuals are **real-world plausible** and grounded in **verified data**. \
@@ -182,87 +183,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-'''
-# Website Parsing Agent
-class WebsiteParsingAgent(autogen.AssistantAgent):
-    def generate_reply(self, messages, sender, **kwargs):
-        """Parses the website and extracts relevant data for counterfactual analysis."""
-        url = messages[-1].get("content", "").strip()  # Assume the user provides the URL as the last message
-        if url:
-            parsed_data = parse_website(url)
-            # Pass the parsed data into the counterfactual analysis
-            return {"role": "assistant", "content": f"Parsed data from the website:\n{parsed_data}"}
-        else:
-            return {"role": "assistant", "content": "Error: No URL provided."}
-
-# Scenario Identification Agent
-class ScenarioIdentificationAgent(autogen.AssistantAgent):
-    def generate_reply(self, messages, sender, **kwargs):
-        """Generates counterfactual scenarios based on extracted website data."""
-        response_text = call_perplexity(messages)
-        return {"role": "assistant", "content": f"Top 2 counterfactuals for '[Metric Name]':\n{response_text}"}
-
-# Data Retrieval Agent
-class DataRetrievalAgent(autogen.AssistantAgent):
-    def generate_reply(self, messages, sender, **kwargs):
-        """Retrieves relevant data for the identified counterfactuals."""
-        response_text = call_perplexity(messages)
-        return {"role": "assistant", "content": f"Retrieved data:\n{response_text}"}
-
-# Citation Validation Agent
-class CitationValidationAgent(autogen.AssistantAgent):
-    def generate_reply(self, messages, sender, **kwargs):
-        """Verifies the validity of the data sources."""
-        response_text = call_perplexity(messages)
-        return {"role": "assistant", "content": f"Verified citations:\n{response_text}"}
-
-# Data Accuracy Agent
-class DataAccuracyAgent(autogen.AssistantAgent):
-    def generate_reply(self, messages, sender, **kwargs):
-        """Ensures the accuracy of counterfactual data and adjusts where necessary."""
-        response_text = call_perplexity(messages)
-        return {"role": "assistant", "content": f"Revised counterfactuals:\n{response_text}"}
-
-# Instantiate the Agents
-website_parsing_agent = WebsiteParsingAgent(name="WebsiteParsingAgent")
-scenario_agent = ScenarioIdentificationAgent(name="ScenarioIdentificationAgent")
-data_retrieval_agent = DataRetrievalAgent(name="DataRetrievalAgent")
-citation_validation_agent = CitationValidationAgent(name="CitationValidationAgent")
-data_accuracy_agent = DataAccuracyAgent(name="DataAccuracyAgent")
-
-# Create the user proxy agent
-user_proxy = autogen.UserProxyAgent(
-    name="user_proxy",
-    human_input_mode="ALWAYS",
-    max_consecutive_auto_reply=5,
-    is_termination_msg=lambda x: x.get("content", "").rstrip().endswith("TERMINATE"),
-    system_message="You are conducting counterfactual impact analysis research."
-)
-
-# Define the task for counterfactual analysis
-counterfactual_task = """
-Please provide a website URL. I will parse the content of the website and perform a counterfactual analysis on the extracted data. 
-This includes generating alternative scenarios, collecting data, verifying citations, and ensuring data accuracy.
-"""
-
-# Start the interaction: Website Parsing Phase (first step)
-user_proxy.initiate_chat(website_parsing_agent, message=counterfactual_task)
-
-scenario_task = "Identify 2 alternative scenarios without the product or service of the company based on information from the website"
-user_proxy.initiate_chat(scenario_agent, message=scenario_task)
-
-# After parsing, proceed with counterfactual analysis steps
-data_task = "Collect relevant data for each alternative scenario."
-user_proxy.initiate_chat(data_retrieval_agent, message=data_task)
-
-# Citation Validation Phase
-validation_task = "Verify the citations for the collected data."
-user_proxy.initiate_chat(citation_validation_agent, message=validation_task)
-
-# Data Accuracy Phase
-accuracy_task = "Ensure the accuracy of the data and calculate approximations if necessary."
-user_proxy.initiate_chat(data_accuracy_agent, message=accuracy_task)
-
-'''
